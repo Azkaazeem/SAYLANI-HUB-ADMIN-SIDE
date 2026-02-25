@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from './Comp/lib/supabaseClient';
 import DashboardLayout from './pages/DashboardLayout';
-import AdminLogin from './pages/AdminLogin';
 
 export default function App() {
   const [session, setSession] = useState(null);
@@ -22,17 +21,22 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Jab tak Supabase check kar raha hai, bilkul safed screen dikhaye (koi admin styling nahi)
+  // Jab tak Supabase check kar raha hai, thoda wait (loading) dikhaye
   if (isChecking) {
-    return <div className="h-screen w-screen bg-white dark:bg-slate-900"></div>;
+    return (
+      <div className="h-screen w-screen bg-white dark:bg-slate-900 flex items-center justify-center">
+        <p className="text-gray-500 dark:text-gray-400">Loading Admin Panel...</p>
+      </div>
+    );
   }
 
-  // Agar user login NAI hai, toh AdminLogin page dikhaye
+  // Agar user login NAI hai (ya logout ho gaya hai), toh usay FORAN User Site par bhej dein
   if (!session) {
-    return <AdminLogin />;
+    window.location.href = 'https://saylani-hub-orpin.vercel.app/';
+    return null; // Jab tak redirect ho raha hai, blank screen show kare
   }
 
-  // Agar login ho gaya hai, toh apna Dashboard Layout dikhaye
+  // Agar admin login hai, toh apna Dashboard Layout dikhaye
   return (
     <DashboardLayout />
   );
