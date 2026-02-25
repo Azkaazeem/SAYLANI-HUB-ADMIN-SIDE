@@ -1,35 +1,39 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { useEffect, useState } from 'react';
+import { supabase } from './Comp/lib/supabaseClient';
+import DashboardLayout from './pages/DashboardLayout';
+import AdminLogin from './pages/AdminLogin';
 
-function App() {
-  const [count, setCount] = useState(0)
+export default function App() {
+  const [session, setSession] = useState(null);
+  const [isChecking, setIsChecking] = useState(true);
 
+  useEffect(() => {
+    // Shuru mein current session check karein
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setIsChecking(false); // Checking khatam ho gayi
+    });
+
+    // Jab koi login ya logout kare, toh automatically update ho jaye
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Jab tak Supabase check kar raha hai, bilkul safed screen dikhaye (koi admin styling nahi)
+  if (isChecking) {
+    return <div className="h-screen w-screen bg-white dark:bg-slate-900"></div>;
+  }
+
+  // Agar user login NAI hai, toh AdminLogin page dikhaye
+  if (!session) {
+    return <AdminLogin />;
+  }
+
+  // Agar login ho gaya hai, toh apna Dashboard Layout dikhaye
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <DashboardLayout />
+  );
 }
-
-export default App
