@@ -7,13 +7,11 @@ export default function App() {
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    // Shuru mein current session check karein
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      setIsChecking(false); // Checking khatam ho gayi
+      setIsChecking(false); 
     });
 
-    // Jab koi login ya logout kare, toh automatically update ho jaye
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
@@ -21,7 +19,6 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Jab tak Supabase check kar raha hai, thoda wait (loading) dikhaye
   if (isChecking) {
     return (
       <div className="h-screen w-screen bg-white dark:bg-slate-900 flex items-center justify-center">
@@ -30,13 +27,13 @@ export default function App() {
     );
   }
 
-  // Agar user login NAI hai (ya logout ho gaya hai), toh usay FORAN User Site par bhej dein
+  // Agar user login NAI hai (toh usay FORAN User Site par bhej dein)
   if (!session) {
-    window.location.href = 'https://saylani-hub-orpin.vercel.app/';
-    return null; // Jab tak redirect ho raha hai, blank screen show kare
+    window.location.replace('https://saylani-hub-orpin.vercel.app/');
+    return null; 
   }
 
-  // Agar admin login hai, toh apna Dashboard Layout dikhaye
+  // Agar login hai toh Dashboard dikhaye
   return (
     <DashboardLayout />
   );
